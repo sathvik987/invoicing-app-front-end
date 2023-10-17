@@ -1,0 +1,13 @@
+.main-div {
+    padding: 1em;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.close-icon {
+    color: red;
+    cursor: pointer;
+    float: right;
+}
