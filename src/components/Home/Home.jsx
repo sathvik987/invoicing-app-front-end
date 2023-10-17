@@ -18,6 +18,24 @@ import { useState, Fragment, useEffect } from "react";
 import ItemsList from "../Invoice/ItemsList";
 import InvoiceList from "../Invoice/InvoiceList";
 
+
+import { connect } from 'react-redux';
+import { setSearchField, requestInvoices } from '../../store/actions';
+
+const mapStateToProps = (state) => {
+    return {};
+};
+
+const mapDisptachToProps = (dispatch) => {
+    return {
+        onSearchChange: (text) => {
+            dispatch(setSearchField(text));
+        },
+        getInvoices: () => dispatch(requestInvoices())
+    };
+};
+
+
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -70,7 +88,7 @@ const defaultItem = {
     total: ''
 };
 
-function Home() {
+function Home(props) {
     const [openFormModal, setOpenFormModal] = useState(false);
     const [openItemModal, setOpenItemModal] = useState(false);
     const [invoiceData, setInvoiceData] = useState(defaultInvoice);
@@ -79,12 +97,12 @@ function Home() {
     const [open, setOpen] = useState(false);
     const [success, setSuccess] = useState(null);
     const [openSuccess, setOpenSuccess] = useState(false);
-    const [invoices, setInvoices] = useState([]);
-    const [searchText, setSearchText] = useState("");
+
+    const { onSearchChange, getInvoices } = props;
 
     useEffect(() => {
         getInvoices();
-    }, []);
+    }, [getInvoices]);
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -98,19 +116,6 @@ function Home() {
             return;
         }
         setOpenSuccess(false);
-    };
-
-    const getInvoices = async () => {
-        try {
-            let res = await (await fetch('http://localhost:9000/api/invoice')).json();
-            setInvoices(res);
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const getFilteredInvoice = () => {
-        return invoices.filter((invoice) => String(invoice.invoiceNumber).includes(searchText.toLowerCase()) || invoice.clientName.toLowerCase().includes(searchText.toLowerCase()));
     };
 
     const markAsPaid = async (invoice) => {
@@ -201,11 +206,11 @@ function Home() {
                     </Grid>
                     <Grid item xs={12} style={{ textAlign: 'center' }}>
                         <TextField size="small" label="Search" variant="outlined"
-                            onChange={(e) => setSearchText(e.target.value)} />
+                            onChange={(e) => onSearchChange(e.target.value)} />
                         <Button onClick={() => { setInvoiceData({ ...defaultInvoice, items: [] }); setOpenFormModal(true); }} variant="contained" style={{ marginLeft: "1em" }}><AddIcon></AddIcon>Add Invoice</Button>
                     </Grid>
                     <Grid item xs={12} className='text-center'>
-                        <InvoiceList markAsPaid={markAsPaid} sendMail={sendMail} invoices={getFilteredInvoice() && getFilteredInvoice().length ? getFilteredInvoice() : []}></InvoiceList>
+                        <InvoiceList markAsPaid={markAsPaid} sendMail={sendMail}></InvoiceList>
                     </Grid>
 
                 </Grid>
@@ -345,4 +350,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default connect(mapStateToProps, mapDisptachToProps)(Home);

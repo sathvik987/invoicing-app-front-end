@@ -15,6 +15,22 @@ import ItemsList from "./ItemsList";
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 
+import { connect } from 'react-redux';
+
+const mapStateToProps = (state) => {
+    return {
+        searchField: state.searchInvoices.searchField,
+        invoices: state.requestInvoices.invoices,
+        isPending: state.requestInvoices.isPending,
+        error: state.requestInvoices.error
+    };
+};
+
+const mapDisptachToProps = (dispatch) => {
+    return {};
+};
+
+
 const style = {
     position: 'absolute',
     top: '50%',
@@ -34,6 +50,8 @@ function InvoiceList(props) {
     const [openItemModal, setOpenItemModal] = useState(false);
     const [itemsToView, setItemsToView] = useState([]);
 
+    const { searchField, invoices } = props;
+
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -43,9 +61,14 @@ function InvoiceList(props) {
         setPage(0);
     };
 
+
+    const getFilteredInvoice = () => {
+        return invoices.filter((invoice) => String(invoice.invoiceNumber).includes(searchField.toLowerCase()) || invoice.clientName.toLowerCase().includes(searchField.toLowerCase()));
+    };
+
     return (
         <Fragment>
-            {props.invoices && props.invoices.length ? <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+            {getFilteredInvoice() && getFilteredInvoice().length ? <Paper sx={{ width: '100%', overflow: 'hidden' }}>
                 <TableContainer sx={{ height: "66vh" }}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
@@ -98,7 +121,7 @@ function InvoiceList(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {props.invoices
+                            {getFilteredInvoice()
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((invoice) => {
                                     return (
@@ -162,7 +185,7 @@ function InvoiceList(props) {
                 <TablePagination
                     rowsPerPageOptions={[10, 25, 100]}
                     component="div"
-                    count={props.invoices.length}
+                    count={getFilteredInvoice().length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -192,4 +215,4 @@ function InvoiceList(props) {
 }
 
 
-export default InvoiceList;
+export default connect(mapStateToProps, mapDisptachToProps)(InvoiceList);

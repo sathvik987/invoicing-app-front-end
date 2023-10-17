@@ -4,10 +4,20 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import { searchInvoices, requestInvoices } from './store/reducers';
+import { legacy_createStore, applyMiddleware, combineReducers } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import { Provider } from 'react-redux';
+
+const rootReducer = combineReducers({ searchInvoices, requestInvoices });
+const store = legacy_createStore(rootReducer, applyMiddleware(thunkMiddleware));
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>
 );
 
